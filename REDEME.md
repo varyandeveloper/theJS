@@ -1,1 +1,0 @@
-Author:Varazdat Stepnayn
