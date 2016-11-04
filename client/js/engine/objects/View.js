@@ -13,13 +13,13 @@ $vs.engine.objects.View = (function () {
      */
     var viewFile;
     /**
-     *
-     * @type {{}}
+     * @type {string}
      */
-    View.completedResponses = {
-        extendContent: "",
-        content: ""
-    };
+    var content;
+    /**
+     * @type {string}
+     */
+    var extendContent;
 
     /**
      *
@@ -63,25 +63,25 @@ $vs.engine.objects.View = (function () {
 
         http().url($vs.appPath + 'views/' + viewFile.replace('.', '/') + '.html', true).get({}).then(function (response, http) {
 
-            if (typeof View.completedResponses[viewFile] == 'undefined') {
-                View.completedResponses[viewFile] = {
+            if (typeof viewFile == 'undefined') {
+                viewFile = {
                     size: 0,
                     viewToShow: ""
                 };
             }
 
-            if (View.completedResponses[viewFile].size != http.getResponseHeader('Content-length')) {
+            if (viewFile.size != http.getResponseHeader('Content-length')) {
                 if ($vs.hashChanged) {
-                    View.completedResponses['content'] = response;
-                    registerExtendsView(View.completedResponses['content'].match(/\@extends(.+?)\)/g));
+                    content = response;
+                    registerExtendsView(content.match(/\@extends(.+?)\)/g));
                     $vs.hashChanged = false;
                 } else {
-                    View.completedResponses.extendContent = response;
-                    findSections(View.completedResponses['content'].match(/\@section(.+?)\)/g));
+                    extendContent = response;
+                    findSections(content.match(/\@section(.+?)\)/g));
                     registerSections();
                 }
 
-                registerVarsAndFuncs(View.completedResponses['content'].match(/\{{(.*?)\}}/g));
+                registerVarsAndFuncs(content.match(/\{{(.*?)\}}/g));
 
             } else {
                 console.log("Already cached");
@@ -89,7 +89,7 @@ $vs.engine.objects.View = (function () {
 
             document.getElementsByTagName('title')[0].innerText = $vs.engine.objects.Controller.getTitle();
             document.getElementsByTagName('html')[0].setAttribute('lang', $vs.engine.objects.Controller.getLang());
-            document.getElementsByTagName('app-body')[0].innerHTML = View.completedResponses.content;
+            document.getElementsByTagName('app-body')[0].innerHTML = content;
         });
     }
 
@@ -108,25 +108,36 @@ $vs.engine.objects.View = (function () {
 
                 if(correctKey[correctKey.length-1] == ")")
                 {
-                    var params = correctKey.match(/\((.+?)\)/g);
+                    var functionName = correctKey.substring(0,correctKey.indexOf('(')),
+                        params = correctKey.match(/\((.+?)\)/g);
+                    for(var p = 0; p < params.length; p++){
+                        var param = params[p].replace('(','').replace(')',''),
+                            paramParts = param.split(',');
 
-                }
-
-                keyParts = correctKey.split('.');
-
-                if(keyParts.length > 0)
-                {
-                    correctValue = $vs.args[keyParts[0]];
-                    if (keyParts.length > 1) {
-                        for (var j = 1; j < keyParts.length; j++) {
-                            if (typeof correctValue[keyParts[j]] == 'undefined')
-                                console.error('Undefined index ' + keyParts[j]);
-                            correctValue = correctValue[keyParts[j]];
+                        if(typeof window[functionName] == 'undefined'){
+                            console.error("Function "+functionName+" not defined");
+                        }else{
+                            var result = window[functionName].apply(window,evaluateVarTypes(paramParts));
+                            content = content.replace('{{'+functionName+'('+param+')}}',result);
                         }
                     }
-                }
+                }else {
+                    keyParts = correctKey.split('.');
 
-                View.completedResponses['content'] = View.completedResponses['content'].replace(variables[i], correctValue);
+                    if(keyParts.length > 0)
+                    {
+                        correctValue = $vs.args[keyParts[0]];
+                        if (keyParts.length > 1) {
+                            for (var j = 1; j < keyParts.length; j++) {
+                                if (typeof correctValue[keyParts[j]] == 'undefined')
+                                    console.error('Undefined index ' + keyParts[j]);
+                                correctValue = correctValue[keyParts[j]];
+                            }
+                        }
+                    }
+
+                    content = content.replace(variables[i], correctValue);
+                }
             }
         }
     }
@@ -156,9 +167,9 @@ $vs.engine.objects.View = (function () {
             for (i = 0; i < sectionsList.length; i++) {
                 correctKey = sectionsList[i].replace('@section(', '');
                 correctKey = correctKey.replace(')', '');
-                startPoint = View.completedResponses['content'].indexOf("@section(" + correctKey + ")") + correctKey.length + 10;
-                endPoint = View.completedResponses['content'].indexOf("endSection") - 1;
-                sections[correctKey] = View.completedResponses['content'].substring(startPoint, endPoint);
+                startPoint = content.indexOf("@section(" + correctKey + ")") + correctKey.length + 10;
+                endPoint = content.indexOf("endSection") - 1;
+                sections[correctKey] = content.substring(startPoint, endPoint);
             }
         }
 
@@ -171,7 +182,7 @@ $vs.engine.objects.View = (function () {
     function registerSections() {
         if (Object.keys(sections).length !== 0) {
             for (var section in sections) {
-                View.completedResponses['content'] = View.completedResponses.extendContent.replace('@yield(' + section + ')', sections[section]);
+                content = extendContent.replace('@yield(' + section + ')', sections[section]);
             }
         }
     }

@@ -6,7 +6,7 @@
  * @class UserController
  * @namespace $vs.app.controllers
  */
-$vs.app.controllers.UserController = (function () {
+$vs.app.controllers.user.UserController = (function () {
 
     UserController.prototype = Object.create($vs.engine.objects.Controller.prototype);
     UserController.prototype.constructor = UserController;

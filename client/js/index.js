@@ -2,14 +2,14 @@
  *
  * @type {string}
  */
-var ROOT = '/master/client/js/';
+var ROOT = '/master/theJS/client/js/';
 
 /**
  *
  * @type {{app: {controllers: {}, models: {}}, engine: {objects: {}}, args: {}, appPath: string, enginePath: string, require: $vs.require}}
  */
 var $vs = {
-    app: {controllers: {master:{}}, models: {}},
+    app: {controllers: {master:{},user:{}}, models: {}},
     engine: {objects: {}},
     templates:{},
     protected: {},

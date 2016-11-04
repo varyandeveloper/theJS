@@ -3,8 +3,13 @@
  */
 
 router().make('/','MainController');
-router().make('/user','UserController');
-router().make('/user/profile','UserController');
+router().prefix('user',function (router) {
+    router.namespace('user',function (userRouter) {
+        userRouter.make('/','UserController');
+        userRouter.make('/profile','UserController');
+    });
+});
+
 router().make('/about',function () {
-    return 'MainController.about';
+    return "MainController.about";
 }).name('main.about');

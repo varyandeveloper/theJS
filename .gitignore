@@ -1,1 +1,8 @@
 # Created by .ignore support plugin (hsz.mobi)
+/.idea
+/.gitignore
+/client/js/app/controllers/master
+/client/js/app/controllers/MainController.js
+/client/js/app/controllers/UserController.js
+/client/js/app/models/Menu.js
+/client/js/app/models/User.js

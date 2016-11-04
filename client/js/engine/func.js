@@ -9,8 +9,28 @@ if (typeof window.view == 'undefined') {
 }
 
 if(typeof window.route == 'undefined'){
-    window.route = function (key) {
+    /**
+     *
+     * @param {string} key
+     * @param {Array} args
+     * @returns {*}
+     */
+    window.route = function (key,args) {
+        return $vs.engine.objects.Route.getByName(key);
+    }
+}
 
+if(typeof window.evaluateVarTypes){
+    /**
+     *
+     * @param {Array} data
+     * @returns {Array}
+     */
+    window.evaluateVarTypes = function (data) {
+        for(var i = 0; i < data.length; i++){
+            data[i] = eval('(' + data[i]+ ')')
+        }
+        return data;
     }
 }
 
