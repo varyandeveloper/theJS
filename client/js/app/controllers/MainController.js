@@ -59,7 +59,8 @@ $vs.app.controllers.MainController = (function () {
 
         usersContent += "<ul>";
         users.forEach(function (user) {
-            usersContent += "<li>" + user.firstName + "</li>";
+            var href = "{{route('user.profile',{id:"+user.id+"})}}";
+            usersContent += "<li><a href='"+href+"'>" + user.firstName + "</a></li>";
         });
         usersContent += "</ul>";
 

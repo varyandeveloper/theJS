@@ -4,7 +4,6 @@
 
 router().make('/','MainController');
 
-/*
 router().group({
     prefix:"user",
     namespace:"user"
@@ -12,12 +11,11 @@ router().group({
     userRouter.make('/','UserController');
     userRouter.make('/profile','UserController');
 });
-*/
 
 router().prefix('user',function (router) {
     router.namespace('user',function (userRouter) {
-        userRouter.make('/','UserController');
-        userRouter.make('/profile','UserController');
+        userRouter.make('/{id}','UserController');
+        userRouter.make('/profile','UserController').name('user.profile');
     });
 });
 

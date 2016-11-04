@@ -63,29 +63,17 @@ $vs.engine.objects.View = (function () {
 
         http().url($vs.appPath + 'views/' + viewFile.replace('.', '/') + '.html', true).get({}).then(function (response, http) {
 
-            if (typeof viewFile == 'undefined') {
-                viewFile = {
-                    size: 0,
-                    viewToShow: ""
-                };
-            }
-
-            if (viewFile.size != http.getResponseHeader('Content-length')) {
-                if ($vs.hashChanged) {
-                    content = response;
-                    registerExtendsView(content.match(/\@extends(.+?)\)/g));
-                    $vs.hashChanged = false;
-                } else {
-                    extendContent = response;
-                    findSections(content.match(/\@section(.+?)\)/g));
-                    registerSections();
-                }
-
-                registerVarsAndFuncs(content.match(/\{{(.*?)\}}/g));
-
+            if ($vs.hashChanged) {
+                content = response;
+                registerExtendsView(content.match(/\@extends(.+?)\)/g));
+                $vs.hashChanged = false;
             } else {
-                console.log("Already cached");
+                extendContent = response;
+                findSections(content.match(/\@section(.+?)\)/g));
+                registerSections();
             }
+
+            registerVarsAndFuncs(content.match(/\{{(.*?)\}}/g));
 
             document.getElementsByTagName('title')[0].innerText = $vs.engine.objects.Controller.getTitle();
             document.getElementsByTagName('html')[0].setAttribute('lang', $vs.engine.objects.Controller.getLang());

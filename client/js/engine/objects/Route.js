@@ -68,6 +68,9 @@ $vs.engine.objects.Route = (function () {
         activeRoute = $key;
 
         Route.routes[$key] = {};
+        var keyInfo = detectParameters($key);
+        Route.routes[$key].params = keyInfo.params;
+        Route.routes[$key].keyParts = keyInfo.keyParts;
 
         switch (true) {
             case typeof $value == 'function':
@@ -184,6 +187,17 @@ $vs.engine.objects.Route = (function () {
      * @returns {string|function|null}
      */
     Route.prototype.getCurrent = function () {
+
+        var currentUrlParts = this.url.get().split('/');
+
+        for(var item in Route.routes){
+            if(typeof Route.routes[item].keyParts !== "undefined" && Route.routes[item].keyParts.length == currentUrlParts.length){
+                console.log(Route.routes[item]);
+            }
+        }
+
+        return;
+
         return typeof Route.routes[this.url.get()] == 'undefined'
             ? null
             : Route.routes[this.url.get()].destination;
@@ -204,6 +218,37 @@ $vs.engine.objects.Route = (function () {
         if ($string.length > 1)
             $string = $string.replace(/\/$/, "");
         return $string;
+    }
+
+    /**
+     *
+     * @param {string} $key
+     * @returns {{}}
+     */
+    function detectParameters($key) {
+        var parameters = [], param, optional = false;
+        if($key.indexOf('{') !== -1){
+            var keyParts = $key.split('/');
+            for(var i = 0; i < keyParts.length; i++){
+                if(keyParts[i].indexOf('{') !== -1){
+                    optional = false;
+                    param = keyParts[i].replace('{','').replace('}','');
+                    if(param.indexOf('?') !== -1){
+                        optional = true;
+                        param = param.replace('?','');
+
+                    }
+                    parameters.push({
+                        optional: optional,
+                        keyName: param
+                    });
+                }
+            }
+        }
+        return {
+            keyParts:keyParts,
+            params:parameters
+        };
     }
 
     return Route;
