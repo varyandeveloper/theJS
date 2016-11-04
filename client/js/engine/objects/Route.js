@@ -8,6 +8,9 @@
  */
 $vs.engine.objects.Route = (function () {
 
+    /**
+     * @type {Route}
+     */
     var self;
     /**
      * @type {string}
@@ -42,6 +45,10 @@ $vs.engine.objects.Route = (function () {
         this.url = new $vs.engine.objects.URL();
     }
 
+    /**
+     *
+     * @returns {$vs.engine.objects.Route|Route|*|Route|null}
+     */
     Route.getInstance = function () {
         if (Route.instance == null)
             Route.instance = new $vs.engine.objects.Route();
@@ -112,8 +119,43 @@ $vs.engine.objects.Route = (function () {
         return this;
     };
 
+    /**
+     *
+     * @param {object} $params
+     * @param {function} $callback
+     * @returns {*}
+     */
     Route.prototype.group = function ($params, $callback) {
 
+        var isNamespace = false,isPrefix = false;
+
+        if(typeof $params != 'object'){
+            console.error("The first parameter of group method must be an object");
+            return void(0);
+        }
+
+        if($params.hasOwnProperty('prefix')){
+            isPrefix = true;
+            activePrefixes.push($params.prefix);
+        }
+
+
+        if($params.hasOwnProperty('namespace')){
+            isNamespace = true;
+            activeNamespaces.push($params.namespace);
+        }
+
+        if(typeof $callback !== "function"){
+            console.error("Second parameter of group method must be of type function");
+            return void(0);
+        }
+
+        $callback(this);
+
+        if(isNamespace) activeNamespaces.pop();
+        if(isPrefix) activePrefixes.pop();
+
+        return this;
     };
 
     /**
